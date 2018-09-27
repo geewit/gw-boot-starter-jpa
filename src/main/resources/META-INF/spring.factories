@@ -1,0 +1,6 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+io.geewit.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,\
+io.geewit.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+
+org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration=\
+io.geewit.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
