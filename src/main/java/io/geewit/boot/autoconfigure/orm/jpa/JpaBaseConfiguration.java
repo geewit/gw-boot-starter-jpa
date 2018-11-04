@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.boot.autoconfigure.domain.EntityScanPackages;
+import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -100,13 +101,15 @@ public abstract class JpaBaseConfiguration implements BeanFactoryAware {
 	@ConditionalOnMissingBean
 	@SuppressWarnings("deprecation")
 	public EntityManagerFactoryBuilder entityManagerFactoryBuilder(
-			JpaVendorAdapter jpaVendorAdapter,
-			ObjectProvider<PersistenceUnitManager> persistenceUnitManager) {
-		EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(
-				jpaVendorAdapter, this.properties.getProperties(),
-				persistenceUnitManager.getIfAvailable());
-		builder.setCallback(getVendorCallback());
-		return builder;
+            JpaVendorAdapter jpaVendorAdapter,
+            ObjectProvider<PersistenceUnitManager> persistenceUnitManager,
+            ObjectProvider<EntityManagerFactoryBuilderCustomizer> customizers) {
+        EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(
+                jpaVendorAdapter, this.properties.getProperties(),
+                persistenceUnitManager.getIfAvailable());
+        customizers.orderedStream()
+                .forEach((customizer) -> customizer.customize(builder));
+        return builder;
 	}
 
 	@Bean
@@ -132,10 +135,6 @@ public abstract class JpaBaseConfiguration implements BeanFactoryAware {
 	 * @param vendorProperties the vendor properties to customize
 	 */
 	protected void customizeVendorProperties(Map<String, Object> vendorProperties) {
-	}
-
-	protected EntityManagerFactoryBuilder.EntityManagerFactoryBeanCallback getVendorCallback() {
-		return null;
 	}
 
 	protected String[] getPackagesToScan() {
